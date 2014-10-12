@@ -117,11 +117,11 @@
  * Fuse L: 0xE2 (internal osc)
  */
 #define F_CPU       8000000
-#define BAUDRATE    115200
+#define BAUDRATE    19200
 #define DEVCODE     0x72    /* mega32 devcode */
 
 /* 100 * 10ms => 1000ms */
-#define TIMEOUT     100
+//#define TIMEOUT     100
 
 /* enter bootloader if PINB1 is low */
 #define ISP_DDR     DDRB
@@ -135,9 +135,6 @@
 #define LED_PORT    PORTB
 #define LED_NUM     PORTB0
 #define LED_POL     1
-
-/* trim internal oscillator to get "good" baudrate */
-#define OSCCAL_VALUE    0x80
 
 /* *********************************************************************** */
 #else
@@ -351,6 +348,11 @@ int main(void)
     /* set as input, enable pullup/pulldown */
     ISP_INIT();
 
+    {
+        volatile uint8_t wait = 0;
+        while (--wait);
+    }
+
     /* check if bootloader is not selected */
     if (ISP_CHECK()) {
         jump_to_app();
@@ -368,7 +370,7 @@ int main(void)
     /* initalize UART */
     uartinit();
 
-    uint8_t val = 'S';
+    uint8_t val = 0x1B;
 
 #if defined(TIMEOUT)
     uint8_t prev = 0x00;

@@ -52,7 +52,7 @@
 /* *********************************************************************** */
 #elif defined(CONFIG_flightctrl)
 /*
- * using ATmega644 @20MHz:
+ * using ATmega644P @20MHz:
  * Fuse E: 0xFD (2.7V BOD)
  * Fuse H: 0xDC (1024 words bootloader)
  * Fuse L: 0xFF (ext. Crystal)
@@ -81,11 +81,11 @@
 #define SUPPORT_MKBL 1
 
 /* *********************************************************************** */
-#elif defined(CONFIG_funkstuff)
+#elif defined(CONFIG_funkstuff88)
 /*
  * using ATmega88 @8MHz:
- * Fuse E: 0xFA (2.7V BOD)
- * Fuse H: 0xDD (512 words bootloader)
+ * Fuse E: 0xFA (512 words bootloader)
+ * Fuse H: 0xDD (2.7V BOD)
  * Fuse L: 0xE2 (internal osc)
  */
 #define F_CPU       8000000
@@ -102,11 +102,39 @@
 //#define ISP_NUM     PIND3
 //#define ISP_POL     1
 
-/* low active led on PORTB3 */
-//#define LED_DDR     DDRB
-//#define LED_PORT    PORTB
-//#define LED_NUM     PORTB3
-//#define LED_POL     0
+/* low active led on PORTD6 */
+#define LED_DDR     DDRD
+#define LED_PORT    PORTD
+#define LED_NUM     PORTD6
+#define LED_POL     0
+
+/* *********************************************************************** */
+#elif defined(CONFIG_funkstuff168)
+/*
+ * using ATmega168 @16MHz:
+ * Fuse E: 0xFA (512 words bootloader)
+ * Fuse H: 0xDD (2.7V BOD)
+ * Fuse L: 0xFF (external crystal)
+ */
+#define F_CPU       16000000
+#define BAUDRATE    19200
+#define DEVCODE     0x74    /* mega16 devcode */
+
+/* 100 * 10ms => 1000ms */
+#define TIMEOUT     100
+
+/* enter bootloader if PIND3 is high */
+//#define ISP_DDR     DDRD
+//#define ISP_PIN     PIND
+//#define ISP_PORT    PORTD
+//#define ISP_NUM     PIND3
+//#define ISP_POL     1
+
+/* low active led on PORTD6 */
+#define LED_DDR     DDRD
+#define LED_PORT    PORTD
+#define LED_NUM     PORTD6
+#define LED_POL     0
 
 /* *********************************************************************** */
 #elif defined(CONFIG_ispprog2)
@@ -135,6 +163,28 @@
 #define LED_PORT    PORTB
 #define LED_NUM     PORTB0
 #define LED_POL     1
+
+/* *********************************************************************** */
+#elif defined(CONFIG_avrnetio)
+/*
+ * using ATmega644 @16MHz:
+ * Fuse E: 0xFD (2.7V BOD)
+ * Fuse H: 0xDC (1024 words bootloader)
+ * Fuse L: 0xD7 (ext. Crystal)
+ */
+#define F_CPU       16000000
+#define BAUDRATE    38400
+#define DEVCODE     0x74    /* mega16 devcode */
+
+/* 100 * 10ms => 1000ms */
+#define TIMEOUT     100
+
+/* enter bootloader if PINB1 is low */
+#define ISP_DDR     DDRB
+#define ISP_PIN     PINB
+#define ISP_PORT    PORTB
+#define ISP_NUM     PINB1
+#define ISP_POL     0
 
 /* *********************************************************************** */
 #else
@@ -208,7 +258,8 @@ static uint8_t recvcheck(void)
 } /* recvcheck */
 #endif /* defined(TIMEOUT) */
 
-#elif defined(__AVR_ATmega88__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega644P__)
+#else
+
 static void uartinit(void)
 {
     /* set baudrate */
@@ -287,11 +338,9 @@ static void writeEEpromPage(uint16_t size)
 #if defined(__AVR_ATmega16__)
         EECR |= (1<<EEMWE);
         EECR |= (1<<EEWE);
-#elif defined(__AVR_ATmega88__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega644P__)
+#else
         EECR |= (1<<EEMPE);
         EECR |= (1<<EEPE);
-#else
-#error writeEEpromPage() not implemented
 #endif
         eeprom_busy_wait();
 
@@ -324,7 +373,11 @@ static void readSendEEpromPage(uint16_t size)
 } /* readSendEEpromPage */
 
 
-#if defined(__AVR_ATmega88__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega644P__)
+#if defined(__AVR_ATmega88__) || \
+    defined(__AVR_ATmega168__) || \
+    defined(__AVR_ATmega328P__) || \
+    defined(__AVR_ATmega644__) || \
+    defined(__AVR_ATmega644P__)
 /*
  * For newer devices the watchdog timer remains active even after a
  * system reset. So disable it as soon as possible.
@@ -339,7 +392,9 @@ void disable_wdt_timer(void)
 }
 #endif
 
+#if defined(ISP_NUM) || defined(TIMEOUT)
 static void (*jump_to_app)(void) __attribute__ ((noreturn)) = 0x0000;
+#endif
 
 int main(void) __attribute__ ((noreturn));
 int main(void)

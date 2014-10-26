@@ -9,10 +9,12 @@ SOURCE = $(wildcard *.c)
 
 #CONFIG = ispprog
 #CONFIG = flightctrl
-#CONFIG = funkstuff
-CONFIG = ispprog2
+#CONFIG = funkstuff88
+CONFIG = funkstuff168
+#CONFIG = ispprog2
+#CONFIG = avrnetio
 
-AVRDUDE_PROG := -c avr910 -b 115200 -P /dev/ttyUSB0
+AVRDUDE_PROG := -c avr910 -b 115200 -P /dev/ispprog
 #AVRDUDE_PROG := -c dragon_isp -P usb
 
 # ---------------------------------------------------------------------------
@@ -39,13 +41,24 @@ endif
 
 # -------------------------
 
-ifeq ($(CONFIG), funkstuff)
+ifeq ($(CONFIG), funkstuff88)
 MCU=atmega88
 AVRDUDE_MCU=m88 -F
 
-# (ext. crystal)
-#AVRDUDE_FUSES=lfuse:w:0x84:m hfuse:w:0xda:m
+# (8MHz internal osc., 2.7V BOD)
+AVRDUDE_FUSES=lfuse:w:0xe2:m hfuse:w:0xdd:m efuse:w:0x02:m
 BOOTLOADER_START=0x1C00
+endif
+
+# -------------------------
+
+ifeq ($(CONFIG), funkstuff168)
+MCU=atmega168
+AVRDUDE_MCU=m168 -F
+
+# (ext. crystal 16MHz, 2.7V BOD)
+AVRDUDE_FUSES=lfuse:w:0xff:m hfuse:w:0xdd:m efuse:w:0x02:m
+BOOTLOADER_START=0x3C00
 endif
 
 # -------------------------
@@ -57,6 +70,17 @@ AVRDUDE_MCU=m328p -F
 # (8MHz internal osc., 2.7V BOD)
 AVRDUDE_FUSES=lfuse:w:0xe2:m hfuse:w:0xdc:m efuse:w:0x02:m
 BOOTLOADER_START=0x7C00
+endif
+
+# -------------------------
+
+ifeq ($(CONFIG), avrnetio)
+MCU=atmega644
+AVRDUDE_MCU=m644
+
+# (16MHz ext. crystal, 2.7V BOD)
+AVRDUDE_FUSES=lfuse:w:0xd7:m hfuse:w:0xdc:m efuse:w:0xfd:m
+BOOTLOADER_START=0xF800
 endif
 
 # ---------------------------------------------------------------------------

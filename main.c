@@ -502,7 +502,7 @@ int main(void)
         if (val == 'a') {
             response = 'Y';
 
-        /* write address */
+        /* write address: flash:words, eeprom:bytes */
         } else if (val == 'A') {
             address = (recvchar() << 8);
             address |= recvchar();
@@ -528,8 +528,11 @@ int main(void)
                 *data++ = (count < size) ? recvchar() : 0xFF;
             }
 
-            if ((val == 'F') && (address < BOOTLOADER_START)) {
+
+            if ((val == 'F') && (address < (BOOTLOADER_START >> 1))) {
+                address <<= 1;
                 writeFlashPage(size);
+                address >>= 1;
                 response = '\r';
 
             } else if ((val == 'E') && (address < E2END)) {
@@ -549,7 +552,9 @@ int main(void)
             val = recvchar();
 
             if (val == 'F') {
+                address <<= 1;
                 readSendFlashPage(size);
+                address >>= 1;
 
             } else if (val == 'E') {
                 readSendEEpromPage(size);

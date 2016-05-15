@@ -10,9 +10,10 @@ SOURCE = $(wildcard *.c)
 #CONFIG = ispprog
 #CONFIG = flightctrl
 #CONFIG = funkstuff88
-CONFIG = funkstuff168
+#CONFIG = funkstuff168
 #CONFIG = ispprog2
 #CONFIG = avrnetio
+CONFIG = funkbridge
 
 AVRDUDE_PROG := -c avr910 -b 115200 -P /dev/ispprog
 #AVRDUDE_PROG := -c dragon_isp -P usb
@@ -83,6 +84,17 @@ AVRDUDE_FUSES=lfuse:w:0xd7:m hfuse:w:0xdc:m efuse:w:0xfd:m
 BOOTLOADER_START=0xF800
 endif
 
+# -------------------------
+
+ifeq ($(CONFIG), funkbridge)
+MCU=atmega328p
+AVRDUDE_MCU=m328p -F
+
+# (16MHz ext. crystal, 2.7V BOD)
+AVRDUDE_FUSES=lfuse:w:0xff:m hfuse:w:0xdc:m efuse:w:0x02:m
+BOOTLOADER_START=0x7C00
+endif
+
 # ---------------------------------------------------------------------------
 
 CFLAGS = -pipe -g -Os -mmcu=$(MCU) -Wall
@@ -102,7 +114,7 @@ $(TARGET): $(TARGET).elf
 
 $(TARGET).elf: $(SOURCE:.c=.o) | $(LDSCRIPT_NOVECT)
 	@echo " Linking file:  $@"
-	@$(CC) $(CFLAGS) $(LDFLAGS) -Wl,-T$(LDSCRIPT_NOVECT) -o $@ $^ #2> /dev/null
+	@$(CC) $(CFLAGS) $(LDFLAGS) -Wl,-T$(LDSCRIPT_NOVECT) -o $@ $^ 2> /dev/null
 	@$(OBJDUMP) -h -S $@ > $(@:.elf=.lss)
 	@$(OBJCOPY) -j .text -j .data -O ihex $@ $(@:.elf=.hex)
 	@$(OBJCOPY) -j .text -j .data -O binary $@ $(@:.elf=.bin)

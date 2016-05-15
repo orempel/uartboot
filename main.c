@@ -84,8 +84,8 @@
 #elif defined(CONFIG_funkstuff88)
 /*
  * using ATmega88 @8MHz:
- * Fuse E: 0xFA (512 words bootloader)
- * Fuse H: 0xDD (2.7V BOD)
+ * Fuse E: 0xFD (2.7V BOD)
+ * Fuse H: 0xDD (512 words bootloader)
  * Fuse L: 0xE2 (internal osc)
  */
 #define F_CPU       8000000
@@ -112,8 +112,8 @@
 #elif defined(CONFIG_funkstuff168)
 /*
  * using ATmega168 @16MHz:
- * Fuse E: 0xFA (512 words bootloader)
- * Fuse H: 0xDD (2.7V BOD)
+ * Fuse E: 0xFD (2.7V BOD)
+ * Fuse H: 0xDD (512 words bootloader)
  * Fuse L: 0xFF (external crystal)
  */
 #define F_CPU       16000000
@@ -140,7 +140,7 @@
 #elif defined(CONFIG_ispprog2)
 /*
  * using ATmega328P @8MHz:
- * Fuse E: 0xFA (2.7V BOD)
+ * Fuse E: 0xFD (2.7V BOD)
  * Fuse H: 0xDC (512 words bootloader)
  * Fuse L: 0xE2 (internal osc)
  */
@@ -185,6 +185,34 @@
 #define ISP_PORT    PORTB
 #define ISP_NUM     PINB1
 #define ISP_POL     0
+
+/* *********************************************************************** */
+#elif defined(CONFIG_funkbridge)
+/*
+ * using ATmega328P @16MHz:
+ * Fuse E: 0xFD (2.7V BOD)
+ * Fuse H: 0xDC (512 words bootloader)
+ * Fuse L: 0xFF (external crystal)
+ */
+#define F_CPU       16000000
+#define BAUDRATE    19200
+#define DEVCODE     0x72    /* mega32 devcode */
+
+/* 100 * 10ms => 1000ms */
+#define TIMEOUT     100
+
+/* enter bootloader if PINB1 is low */
+//#define ISP_DDR     DDRB
+//#define ISP_PIN     PINB
+//#define ISP_PORT    PORTB
+//#define ISP_NUM     PINB1
+//#define ISP_POL     0
+
+/* high active led on PORTD4 */
+#define LED_DDR     DDRD
+#define LED_PORT    PORTD
+#define LED_NUM     PORTD4
+#define LED_POL     1
 
 /* *********************************************************************** */
 #else
